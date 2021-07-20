@@ -1,0 +1,899 @@
+<?php $__env->startSection('content'); ?>
+
+<!-- checkout Content -->
+<section class="checkout-area">
+
+
+
+ <div class="container">
+   <div class="row">
+     <div class="col-12 col-sm-12">
+         <div class="row justify-content-end">
+             <nav aria-label="breadcrumb">
+                 <ol class="breadcrumb">
+                   <li class="breadcrumb-item"><a href="<?php echo e(URL::to('/')); ?>"><?php echo app('translator')->get('website.Home'); ?></a></li>
+                   <li class="breadcrumb-item"><a href="javascript:void(0)"><?php echo app('translator')->get('website.Checkout'); ?></a></li>
+                   <li class="breadcrumb-item">
+                     <a href="javascript:void(0)">
+                       <?php if(session('step')==0): ?>
+                             <?php echo app('translator')->get('website.Shipping Address'); ?>
+                           <?php elseif(session('step')==1): ?>
+                             <?php echo app('translator')->get('website.Billing Address'); ?>
+                           <?php elseif(session('step')==2): ?>
+                             <?php echo app('translator')->get('website.Shipping Methods'); ?>
+                           <?php elseif(session('step')==3): ?>
+                             <?php echo app('translator')->get('website.Order Detail'); ?>
+                           <?php endif; ?>
+                     </a>
+                   </li>
+                 </ol>
+               </nav>
+         </div>
+     </div>
+     <div class="col-12 col-xl-9 checkout-left">
+       <input type="hidden" id="hyperpayresponse" value="<?php if(!empty(session('paymentResponse'))): ?> <?php if(session('paymentResponse')=='success'): ?> <?php echo e(session('paymentResponse')); ?> <?php else: ?> <?php echo e(session('paymentResponse')); ?>  <?php endif; ?> <?php endif; ?>">
+       <div class="alert alert-danger alert-dismissible" id="paymentError" role="alert" style="display:none;">
+           <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+           <?php if(!empty(session('paymentResponse')) and session('paymentResponse')=='error'): ?> <?php echo e(session('paymentResponseData')); ?> <?php endif; ?>
+       </div>
+         <div class="row">
+           <div class="checkout-module">
+             <ul class="nav nav-pills mb-3 checkoutd-nav d-none d-lg-flex" id="pills-tab" role="tablist">
+                 <li class="nav-item">
+                   <a class="nav-link <?php if(session('step')==0): ?> active <?php elseif(session('step')>0): ?> active-check <?php endif; ?>" id="pills-shipping-tab" data-toggle="pill" href="#pills-shipping" role="tab" aria-controls="pills-shipping" aria-selected="true"><?php echo app('translator')->get('website.Shipping Address'); ?></a>
+                 </li>
+                 <li class="nav-item">
+                   <a class="nav-link <?php if(session('step')==1): ?> active <?php elseif(session('step')>1): ?> active-check <?php endif; ?>" <?php if(session('step')>=1): ?> id="pills-billing-tab" data-toggle="pill" href="#pills-billing" role="tab" aria-controls="pills-billing" aria-selected="false"  <?php endif; ?> ><?php echo app('translator')->get('website.Billing Address'); ?></a>
+                 </li>
+                 <li class="nav-item">
+                   <a class="nav-link <?php if(session('step')==2): ?> active <?php elseif(session('step')>2): ?> active-check <?php endif; ?>" <?php if(session('step')>=2): ?> id="pills-method-tab" data-toggle="pill" href="#pills-method" role="tab" aria-controls="pills-method" aria-selected="false" <?php endif; ?>> <?php echo app('translator')->get('website.Shipping Methods'); ?></a>
+                 </li>
+                 <li class="nav-item">
+                     <a class="nav-link <?php if(session('step')==3): ?> active <?php elseif(session('step')>3): ?> active-check <?php endif; ?>"  <?php if(session('step')>=3): ?> id="pills-order-tab" data-toggle="pill" href="#pills-order" role="tab" aria-controls="pills-order" aria-selected="false"<?php endif; ?>><?php echo app('translator')->get('website.Order Detail'); ?></a>
+                   </li>
+               </ul>
+               <ul class="nav nav-pills mb-3 checkoutm-nav d-flex d-lg-none" id="pills-tab" role="tablist">
+                 <li class="nav-item">
+                   <a class="nav-link <?php if(session('step')==0): ?> active <?php elseif(session('step')>0): ?> active-check <?php endif; ?>" id="pills-shipping-tab" data-toggle="pill" href="#pills-shipping" role="tab" aria-controls="pills-shipping" aria-selected="true">1</a>
+                 </li>
+                 <li class="nav-item second">
+                   <a class="nav-link <?php if(session('step')==1): ?> active <?php elseif(session('step')>1): ?> active-check <?php endif; ?>" <?php if(session('step')>=1): ?> id="pills-billing-tab" data-toggle="pill" href="#pills-billing" role="tab" aria-controls="pills-billing" aria-selected="false"  <?php endif; ?> >2</a>
+                 </li>
+                 <li class="nav-item third">
+                   <a class="nav-link <?php if(session('step')==2): ?> active <?php elseif(session('step')>2): ?> active-check <?php endif; ?>" <?php if(session('step')>=2): ?> id="pills-method-tab" data-toggle="pill" href="#pills-method" role="tab" aria-controls="pills-method" aria-selected="false" <?php endif; ?>>3</a>
+                 </li>
+                 <li class="nav-item fourth">
+                   <a class="nav-link <?php if(session('step')==3): ?> active <?php elseif(session('step')>3): ?> active-check <?php endif; ?>"  <?php if(session('step')>=3): ?> id="pills-order-tab" data-toggle="pill" href="#pills-order" role="tab" aria-controls="pills-order" aria-selected="false"<?php endif; ?>>4</a>
+                   </li>
+               </ul>
+               <div class="tab-content" id="pills-tabContent">
+                 <div class="tab-pane fade <?php if(session('step') == 0): ?> show active <?php endif; ?>" id="pills-shipping" role="tabpanel" aria-labelledby="pills-shipping-tab">
+                   <form name="signup" enctype="multipart/form-data" class="form-validate"  action="<?php echo e(URL::to('/checkout_shipping_address')); ?>" method="post">
+                     <input type="hidden" required name="_token" id="csrf-token" value="<?php echo e(Session::token()); ?>" />
+                     <div class="form-group">
+                       <label for="firstName"><?php echo app('translator')->get('website.First Name'); ?> *</label>
+                       <input type="text"  required class="form-control field-validate" id="firstname" name="firstname" value="<?php if(!empty(session('shipping_address'))>0): ?><?php echo e(session('shipping_address')->firstname); ?> <?php else: ?> <?php echo e(auth()->guard('customer')->user()->first_name); ?> <?php endif; ?>" aria-describedby="NameHelp1" placeholder="Enter Your Name">
+                       <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your first name'); ?></span>
+                     </div>
+                     <div class="form-group">
+                       <label for="lastName"><?php echo app('translator')->get('website.Last Name'); ?> *</label>
+                       <input type="text" required class="form-control field-validate" id="lastname" name="lastname" value="<?php if(!empty(session('shipping_address'))>0): ?><?php echo e(session('shipping_address')->lastname); ?> <?php else: ?> <?php echo e(auth()->guard('customer')->user()->last_name); ?>  <?php endif; ?>" aria-describedby="NameHelp1" placeholder="Enter Your Last Name">
+                       <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your last name'); ?></span>
+                     </div>
+                     <?php //if(Session::get('guest_checkout') == 1){ ?>
+                     <div class="form-group">
+                       <label for="lastName"><?php echo app('translator')->get('website.Email'); ?> *</label>
+                       <input type="text" required class="form-control field-validate" id="email" name="email" value="<?php if(!empty(session('shipping_address'))>0): ?><?php echo e(session('shipping_address')->email); ?> <?php else: ?> <?php echo e(auth()->guard('customer')->user()->email); ?>  <?php endif; ?>" aria-describedby="NameHelp1" placeholder="Enter Your Email">
+                       <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your email'); ?></span>
+                     </div>
+                     <?php //} ?>
+                     <div class="form-group">
+                       <label for="firstName"><?php echo app('translator')->get('website.Company'); ?></label>
+                       <input type="text" required class="form-control field-validate" id="company" aria-describedby="companyHelp" placeholder="Enter Your Company Name" name="company" value="<?php if(!empty(session('shipping_address'))>0): ?> <?php echo e(session('shipping_address')->company); ?><?php endif; ?>">
+                       <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your company name'); ?></span>
+                     </div>
+
+                     <div class="form-group">
+                       <label for="exampleInputAddress1"><?php echo app('translator')->get('website.Address'); ?></label>
+                       <input type="text" required class="form-control field-validate" name="street" id="street" aria-describedby="addressHelp" placeholder="<?php echo app('translator')->get('website.Please enter your address'); ?>">
+                       <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your address'); ?></span>
+                     </div>
+                     <div class="form-group">
+                       <label for="exampleSelectCountry1"><?php echo app('translator')->get('website.Country'); ?> *</label>
+                       <div class="select-control">
+                           <select required class="form-control field-validate" id="entry_country_id" onChange="getZones();" name="countries_id" aria-describedby="countryHelp">
+                             <option value="" selected><?php echo app('translator')->get('website.Select Country'); ?></option>
+                             <?php if(!empty($result['countries'])>0): ?>
+                               <?php $__currentLoopData = $result['countries']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $countries): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                   <option value="<?php echo e($countries->countries_id); ?>" <?php if(!empty(session('shipping_address'))>0): ?> <?php if(session('shipping_address')->countries_id == $countries->countries_id): ?> selected <?php endif; ?> <?php endif; ?> ><?php echo e($countries->countries_name); ?></option>
+                               <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                             <?php endif; ?>
+                             </select>
+                       </div>
+                       <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please select your country'); ?></span>
+                     </div>
+                     
+                       <?php 
+                        $cities = \DB::table('cities')->where('status',1)->pluck('name');
+                       ?>
+                       
+                       <div class="form-group">
+                           <label for="exampleSelectCountry1"><?php echo app('translator')->get('website.City'); ?> *</label>
+                           <div class="select-control">
+                               <select required class="form-control field-validate" id="city" name="city" aria-describedby="countryHelp">
+                                 <?php if(!empty($cities)): ?>
+                                   <?php $__currentLoopData = $cities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $city): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                       <option value="<?php echo e($city); ?>" <?php if(!empty(session('shipping_address'))>0): ?> <?php if(session('shipping_address')->city == $city): ?> selected <?php endif; ?> <?php endif; ?> ><?php echo e($city); ?></option>
+                                   <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                 <?php endif; ?>
+                                 </select>
+                           </div>
+                           <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your city'); ?></span>
+                        </div>
+                       <div class="form-group">
+                         <label for="exampleInputZpCode1"><?php echo app('translator')->get('website.Zip/Postal Code'); ?></label>
+                         <input type="number" class="form-control" id="postcode" aria-describedby="zpcodeHelp" placeholder="Enter Your Zip / Postal Code" name="postcode" value="<?php if(!empty(session('shipping_address'))>0): ?><?php echo e(session('shipping_address')->postcode); ?><?php endif; ?>">
+                         <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your Zip/Postal Code'); ?></span>
+                       </div>
+                       <div class="form-group">
+                         <label for="exampleInputNumber1"><?php echo app('translator')->get('website.Phone Number'); ?> *</label>
+                         <input required type="text" class="form-control field-validate" id="delivery_phone" aria-describedby="numberHelp" placeholder="Enter Your Phone Number" name="delivery_phone" value="<?php if(!empty(session('shipping_address'))>0): ?><?php echo e(session('shipping_address')->delivery_phone); ?><?php endif; ?>">
+                         <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your valid phone number'); ?></span>
+                       </div>
+                       <div class="col-12 col-sm-12">
+                         <div class="row">
+                           <button type="submit"  class="btn btn-secondary"><?php echo app('translator')->get('website.Continue'); ?></button>
+                         </div>
+                       </div>
+                   </form>
+                 </div>
+                 <div class="tab-pane fade <?php if(session('step') == 1): ?> show active <?php endif; ?>"  id="pills-billing" role="tabpanel" aria-labelledby="pills-billing-tab">
+                     <form name="signup" enctype="multipart/form-data" action="<?php echo e(URL::to('/checkout_billing_address')); ?>" method="post">
+                       <input type="hidden" name="_token" id="csrf-token" value="<?php echo e(Session::token()); ?>" />
+                         <div class="form-group">
+                             <label for="exampleInputName1"><?php echo app('translator')->get('website.First Name'); ?> *</label>
+                             <input type="text" class="form-control same_address" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> readonly <?php endif; ?> <?php else: ?> readonly <?php endif; ?>  id="billing_firstname" name="billing_firstname" value="<?php if(!empty(session('billing_address'))>0): ?><?php echo e(session('billing_address')->billing_firstname); ?> <?php else: ?> <?php echo e(auth()->guard('customer')->user()->first_name); ?> <?php endif; ?>" aria-describedby="NameHelp1" placeholder="Enter Your Name">
+                             <span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your first name'); ?></span>
+                           </div>
+                           <div class="form-group">
+                             <label for="exampleInputName2"><?php echo app('translator')->get('website.Last Name'); ?> *</label>
+                             <input type="text" class="form-control same_address" id="exampleInputName2" aria-describedby="NameHelp2" placeholder="Enter Your Name" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> readonly <?php endif; ?> <?php else: ?> readonly <?php endif; ?>  id="billing_lastname" name="billing_lastname" value="<?php if(!empty(session('billing_address'))>0): ?><?php echo e(session('billing_address')->billing_lastname); ?> <?php else: ?> <?php echo e(auth()->guard('customer')->user()->last_name); ?> <?php endif; ?>">
+                             <span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your last name'); ?></span>
+                           </div>
+                           
+                            <div class="form-group">
+                             <label for="exampleInputName2"><?php echo app('translator')->get('website.Email'); ?> *</label>
+                             <input type="text" class="form-control same_address" id="exampleInputName2" aria-describedby="NameHelp2" placeholder="Enter Your Email" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> readonly <?php endif; ?> <?php else: ?> readonly <?php endif; ?>  id="billing_email" name="billing_email" value="<?php if(!empty(session('billing_address'))>0): ?><?php echo e(session('billing_address')->billing_email); ?> <?php else: ?> <?php echo e(auth()->guard('customer')->user()->email); ?> <?php endif; ?>">
+                             <span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your email'); ?></span>
+                           </div>
+
+                           <div class="form-group">
+                             <label for="exampleInputCompany1"><?php echo app('translator')->get('website.Company'); ?></label>
+                             <input type="text" class="form-control same_address" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> readonly <?php endif; ?> <?php else: ?> readonly <?php endif; ?>  id="billing_company" name="billing_company" value="<?php if(!empty(session('billing_address'))>0): ?><?php echo e(session('billing_address')->billing_company); ?><?php endif; ?>" id="exampleInputCompany1" aria-describedby="companyHelp" placeholder="Enter Your Company Name">
+                             <span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your company name'); ?></span>
+                           </div>
+
+                           <div class="form-group">
+                             <label for="exampleInputAddress1"><?php echo app('translator')->get('website.Address'); ?> *</label>
+                             <input type="text" class="form-control same_address" id="exampleInputAddress1" aria-describedby="addressHelp" placeholder="Enter Your Address" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> readonly <?php endif; ?> <?php else: ?> readonly <?php endif; ?>  id="billing_street" name="billing_street" value="<?php if(!empty(session('billing_address'))>0): ?><?php echo e(session('billing_address')->billing_street); ?><?php endif; ?>">
+                             <span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your address'); ?></span>
+                           </div>
+                           <div class="form-group">
+                             <label for="exampleSelectCountry1"><?php echo app('translator')->get('website.Country'); ?> *</label>
+                             <div class="select-control">
+                                 <select required class="form-control same_address_select" id="billing_countries_id" aria-describedby="countryHelp" onChange="getBillingZones();" name="billing_countries_id" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> disabled <?php endif; ?> <?php else: ?> disabled <?php endif; ?>>
+                                   <option value=""  ><?php echo app('translator')->get('website.Select Country'); ?></option>
+                                   <?php if(!empty($result['countries'])>0): ?>
+                                     <?php $__currentLoopData = $result['countries']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $countries): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                         <option value="<?php echo e($countries->countries_id); ?>" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->billing_countries_id == $countries->countries_id): ?> selected <?php endif; ?> <?php endif; ?> ><?php echo e($countries->countries_name); ?></option>
+                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                   <?php endif; ?>
+                                   </select>
+                             </div>
+                             <span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please select your country'); ?></span>
+                           </div>
+                           
+                         
+                           <div class="form-group">
+                               <label for="exampleSelectCountry1"><?php echo app('translator')->get('website.City'); ?> *</label>
+                               <div class="select-control">
+                                   <select required class="form-control same_address_select" id="billing_city" name="billing_city" aria-describedby="countryHelp" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> disabled <?php endif; ?> <?php else: ?> disabled <?php endif; ?>>
+                                     <?php if(!empty($cities)): ?>
+                                       <?php $__currentLoopData = $cities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $city): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                           <option value="<?php echo e($city); ?>" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->billing_city == $city): ?> selected <?php endif; ?> <?php endif; ?> ><?php echo e($city); ?></option>
+                                       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                     <?php endif; ?>
+                                     </select>
+                               </div>
+                               <span style="color:red;" class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your city'); ?></span>
+                            </div>
+
+                           
+                             <div class="form-group">
+                               <label for="exampleInputZpCode1"><?php echo app('translator')->get('website.Zip/Postal Code'); ?></label>
+                               <input type="text" class="form-control same_address" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> readonly <?php endif; ?> <?php else: ?> readonly <?php endif; ?>  id="billing_zip" name="billing_zip" value="<?php if(!empty(session('billing_address'))>0): ?><?php echo e(session('billing_address')->billing_zip); ?><?php endif; ?>" aria-describedby="zpcodeHelp" placeholder="Enter Your Zip / Postal Code">
+                               <small id="zpcodeHelp" class="form-text text-muted"></small>
+                             </div>
+                             <div class="form-group">
+                               <label for="exampleInputNumber1"><?php echo app('translator')->get('website.Phone Number'); ?> *</label>
+                               <input type="text" class="form-control same_address" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> readonly <?php endif; ?> <?php else: ?> readonly <?php endif; ?>  id="billing_phone" name="billing_phone" value="<?php if(!empty(session('billing_address'))>0): ?><?php echo e(session('billing_address')->billing_phone); ?><?php endif; ?>" aria-describedby="numberHelp" placeholder="Enter Your Phone Number">
+                               <span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your valid phone number'); ?></span>
+                             </div>
+                             <div class="form-group">
+                                 <div class="form-check">
+                                     <input class="form-check-input" type="checkbox" id="same_billing_address" value="1" name="same_billing_address" <?php if(!empty(session('billing_address'))>0): ?> <?php if(session('billing_address')->same_billing_address==1): ?> checked <?php endif; ?> <?php else: ?> checked  <?php endif; ?> > <?php echo app('translator')->get('website.Same shipping and billing address'); ?>>
+
+                                     <small id="checkboxHelp" class="form-text text-muted"></small>
+                                   </div>
+                             </div>
+
+                             <div class="col-12 col-sm-12">
+                             <div class="row">
+                               <button type="submit"  class="btn btn-secondary"><span><?php echo app('translator')->get('website.Continue'); ?><i class="fas fa-caret-right"></i></span></button>
+                               </div>
+                             </div>
+                       </form>
+                 </div>
+                 <div class="tab-pane fade  <?php if(session('step') == 2): ?> show active <?php endif; ?>" id="pills-method" role="tabpanel" aria-labelledby="pills-method-tab">
+
+                             <div class="col-12 col-sm-12 ">
+                                <div class="row"> <p><?php echo app('translator')->get('website.Please select a prefered shipping method to use on this order'); ?></p></div>
+                             </div>
+                             <form name="shipping_mehtods" method="post" id="shipping_mehtods_form" enctype="multipart/form-data" action="<?php echo e(URL::to('/checkout_payment_method')); ?>">
+                               <input type="hidden" name="_token" id="csrf-token" value="<?php echo e(Session::token()); ?>" />
+                                 <?php if(!empty($result['shipping_methods'])>0): ?>
+                                     <input type="hidden" name="mehtod_name" id="mehtod_name">
+                                     <input type="hidden" name="shipping_price" id="shipping_price">
+
+                                <?php $__currentLoopData = $result['shipping_methods']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $shipping_methods): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                         <div class="heading">
+                                             <h2> <?php echo app('translator')->get('website.' . $shipping_methods['name']); ?> </h2>
+                                             <hr>
+                                         </div>
+                                         
+                                         <div class="form-check">
+
+                                             <div class="form-row">
+                                                 <?php if($shipping_methods['success']==1): ?>
+                                                 <ul class="list"style="list-style:none; padding: 0px;">
+                                                     <?php $__currentLoopData = $shipping_methods['services']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $services): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                      <?php
+                                                          if($services['shipping_method']=='upsShipping')
+                                                             $method_name=$shipping_methods['name'].'('.$services['name'].')';
+                                                          else{
+                                                             $method_name=$services['name'];
+                                                             }
+                                                         ?>
+                                                         <li>
+                                                           <?php
+                                                           $default_currency = DB::table('currencies')->where('is_default',1)->first();
+                                                           if($default_currency->id == Session::get('currency_id')){
+
+                                                             $currency_value = 1;
+                                                           }else{
+                                                             $session_currency = DB::table('currencies')->where('id',Session::get('currency_id'))->first();
+
+                                                             $currency_value = $session_currency->value;
+                                                           }
+                                                           ?>
+                                                         <input class="shipping_data" id="<?php echo e($method_name); ?>" type="radio" name="shipping_method" value="<?php echo e($services['shipping_method']); ?>" shipping_price="<?php echo e($services['rate']); ?>"  method_name="<?php echo e($method_name); ?>" <?php if(!empty(session('shipping_detail')) and !empty(session('shipping_detail')) > 0): ?>
+                                                         <?php if(session('shipping_detail')->mehtod_name == $method_name): ?> checked <?php endif; ?>
+                                                         <?php elseif($shipping_methods['is_default']==1): ?> checked <?php endif; ?>
+                                                         >
+                                                          <label for="<?php echo e($method_name); ?>"><?php echo app('translator')->get('website.' . $services['name']); ?> :  <?php echo e(Session::get('symbol_left')); ?><?php echo e($services['rate']* $currency_value); ?><?php echo e(Session::get('symbol_right')); ?></label>
+                                                         </li>
+                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                 </ul>
+                                                 <?php else: ?>
+                                                     <ul class="list"style="list-style:none; padding: 0px;">
+                                                         <li><?php echo app('translator')->get('website.Your location does not support this'); ?> <?php echo e($shipping_methods['name']); ?>.</li>
+                                                     </ul>
+                                                 <?php endif; ?>
+                                             </div>
+                                         </div>
+                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                 <?php endif; ?>
+                                 <div class="alert alert-danger alert-dismissible error_shipping" role="alert" style="display:none;">
+                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                     <?php echo app('translator')->get('website.Please select your shipping method'); ?>
+                                 </div>
+                                 <div class="row">
+                                   <button type="button"class="btn btn-secondary" id="shippingMethodBtn"><span><?php echo app('translator')->get('website.Continue'); ?><i class="fas fa-caret-right"></i></span></button>
+                                   </div>
+                               </form>
+
+
+                 </div>
+                 <div class="tab-pane fade <?php if(session('step') == 3): ?> show active <?php endif; ?>" id="pills-order" role="tabpanel" aria-labelledby="pills-method-order">
+                               <?php
+                                   $price = 0;
+                               ?>
+                               <form method='POST' id="update_cart_form" action='<?php echo e(URL::to('/place_order')); ?>' >
+                                 <?php echo csrf_field(); ?>
+
+
+                                       <table class="table top-table">
+                                           <thead>
+                                               <tr class="d-flex">
+                                                   <th class="col-12 col-md-2"><?php echo app('translator')->get('website.items'); ?></th>
+                                                   <th class="col-12 col-md-4"></th>
+                                                   <th class="col-12 col-md-2"><?php echo app('translator')->get('website.Price'); ?></th>
+                                                   <th class="col-12 col-md-2"><?php echo app('translator')->get('website.Qty'); ?></th>
+                                                   <th class="col-12 col-md-2"><?php echo app('translator')->get('website.SubTotal'); ?></th>
+                                               </tr>
+                                           </thead>
+
+                                           <?php $__currentLoopData = $result['cart']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $products): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                           <?php
+                                              $default_currency = DB::table('currencies')->where('is_default',1)->first();
+                                              if($default_currency->id == Session::get('currency_id')){
+                                                $orignal_price = $products->final_price;
+                                              }else{
+                                                $session_currency = DB::table('currencies')->where('id',Session::get('currency_id'))->first();
+                                                $orignal_price = $products->final_price * $session_currency->value;
+                                              }
+
+                                               $price+= $orignal_price * $products->customers_basket_quantity;
+                                           ?>
+
+                                           <tbody>
+                                               <tr class="d-flex">
+                                                   <td class="col-12 col-md-2 item">
+                                                       <input type="hidden" name="cart[]" value="<?php echo e($products->customers_basket_id); ?>">
+                                                         <a href="<?php echo e(URL::to('/product-detail/'.$products->products_slug)); ?>" class="cart-thumb">
+                                                             <img class="img-fluid" src="<?php echo e(asset('').$products->image_path); ?>" alt="<?php echo e($products->products_name); ?>" alt="">
+                                                         </a>
+                                                   </td>
+                                                   <td class="col-12 col-md-4 item-detail-left">
+                                                     <div class="item-detail">
+                                                         <h4><?php echo e($products->products_name); ?></h4>
+                                                         <div class="item-attributes"></div>
+                                                       </div>
+                                                   </td>
+
+                                                   <?php
+                                                      $default_currency = DB::table('currencies')->where('is_default',1)->first();
+                                                      if($default_currency->id == Session::get('currency_id')){
+                                                        $orignal_price = $products->final_price;
+                                                      }else{
+                                                        $session_currency = DB::table('currencies')->where('id',Session::get('currency_id'))->first();
+                                                        $orignal_price = $products->final_price * $session_currency->value;
+                                                      }
+                                                   ?>
+
+                                                   <td class="item-price col-12 col-md-2"><span><?php echo e(Session::get('symbol_left')); ?><?php echo e($orignal_price+0); ?><?php echo e(Session::get('symbol_right')); ?></span></td>
+                                                   <td class="col-12 col-md-2">
+                                                     <div class="input-group item-quantity">
+
+                                                       <input type="text" id="quantity" readonly name="quantity" class="form-control input-number" value="<?php echo e($products->customers_basket_quantity); ?>">
+
+                                                   </td>
+                                                   <td class="align-middle item-total col-12 col-md-2 subtotal" align="center"><span class="cart_price_<?php echo e($products->customers_basket_id); ?>"><?php echo e(Session::get('symbol_left')); ?><?php echo e($orignal_price * $products->customers_basket_quantity); ?><?php echo e(Session::get('symbol_right')); ?></span>
+                                                   </td>
+                                               </tr>
+                                               <tr class="d-flex">
+                                                   <td class="col-12 col-md-2 p-0">
+                                                     <div class="item-controls">
+                                                         <button  type="button" class="btn" >
+                                                             <a  href="<?php echo e(URL::to('/product-detail/'.$products->products_slug)); ?>"><span class="fas fa-pencil-alt"></span></a>
+                                                         </button>
+                                                         <button  type="button" class="btn" >
+                                                             <a href="<?php echo e(URL::to('/deleteCart?id='.$products->customers_basket_id)); ?>"><span class="fas fa-times"></span></a>
+                                                         </button>
+                                                     </div>
+                                                   </td>
+                                                   <td class="col-12 col-md-10 d-none d-md-block">
+                                                       <?php $__currentLoopData = $other_charges; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $oc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <?php if($oc->categories_id == $products->categories_id): ?>
+                                                        
+                                                            <?php
+                                                                ///now handleother chrages baskets
+                                                                $other_charges_baskets = 	\DB::table('other_charges_baskets')->where('customers_basket_id', '=', $products->customers_basket_id)->first();
+                                                                //dd($other_charges_baskets);
+                                                                //echo $other_charges_baskets->other_charges_id;
+                                                            ?>
+                                                            
+                                                            <input type="checkbox" id="<?php echo e('oc_'.$index.'_'.$oc->id.'_'.$products->customers_basket_id); ?>" 
+                                                                 <?php if($oc->is_disabled == 1): ?> disabled <?php endif; ?>
+                                                                    <?php if(!empty($other_charges_baskets) && $other_charges_baskets->is_checked == 1 &&  $oc->id == $other_charges_baskets->other_charges_id ): ?>  checked <?php endif; ?>  name="other_charges[]" value="<?php echo e($oc->id); ?>" 
+                                                                    onClick="redirect('<?php echo e($index); ?>','<?php echo e($oc->id); ?>','<?php echo e($products->customers_basket_id); ?>')"> 
+                                                                <?php echo e($oc->name); ?>
+
+                                                            <?php echo e('AED '. $oc->amount); ?> (<small color="danger"><?php echo e('Only this price is applicable and Product price will be zero.'); ?></small>)
+                                                            <br/>
+                                                        <?php endif; ?>
+                                                      <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                   </td>
+                                               </tr>
+
+                                           </tbody>
+                                           <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                       </table>
+                                                   <?php
+                                                       if(!empty(session('shipping_detail')) and !empty(session('shipping_detail'))>0){
+                                                           $shipping_price = session('shipping_detail')->shipping_price;
+                                         $shipping_name = session('shipping_detail')->mehtod_name;
+                                                       }else{
+                                                           $shipping_price = 0;
+                                         $shipping_name = '';
+                                                       }
+                                                       $tax_rate = number_format((float)session('tax_rate'), 2, '.', '');
+                                                       $coupon_discount = number_format((float)session('coupon_discount'), 2, '.', '');
+                                                       $total_price = ($price+$tax_rate+$shipping_price)-$coupon_discount;
+                                       session(['total_price'=>$total_price]);
+
+                                        ?>
+                               </form>
+                                   <div class="col-12 col-sm-12">
+                                       <div class="row">
+                                         <div class="heading">
+                                           <h2><?php echo app('translator')->get('website.orderNotesandSummary'); ?></h2>
+                                           <hr>
+                                         </div>
+                                         <div class="form-group" style="width:100%; padding:0;">
+                                             <label for="exampleFormControlTextarea1"><?php echo app('translator')->get('website.Please write notes of your order'); ?></label>
+                                             <textarea name="comments" class="form-control" id="order_comments" rows="3"><?php if(!empty(session('order_comments'))): ?><?php echo e(session('order_comments')); ?><?php endif; ?></textarea>
+                                           </div>
+                                       </div>
+
+                                   </div>
+                                   <div class="col-12 col-sm-12 mb-3">
+                                       <div class="row">
+                                         <div class="heading">
+                                           <h2><?php echo app('translator')->get('website.Payment Methods'); ?></h2>
+                                           <hr>
+                                         </div>
+
+                                           <div class="form-group" style="width:100%; padding:0;">
+                                               <p class="title"><?php echo app('translator')->get('website.Please select a prefered payment method to use on this order'); ?></p>
+
+                                               <div class="alert alert-danger error_payment" style="display:none" role="alert">
+                                                   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                   <?php echo app('translator')->get('website.Please select your payment method'); ?>
+                                               </div>
+
+                                               <form name="shipping_mehtods" method="post" id="payment_mehtods_form" enctype="multipart/form-data" action="<?php echo e(URL::to('/order_detail')); ?>">
+                                                 <input type="hidden" name="_token" id="csrf-token" value="<?php echo e(Session::token()); ?>" />
+                                                   <ul class="list"style="list-style:none; padding: 0px;">
+                                                       <?php $__currentLoopData = $result['payment_methods']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment_methods): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                           <?php if($payment_methods['active']==1): ?>
+                                                               <input id="payment_currency" type="hidden" onClick="paymentMethods();" name="payment_currency" value="<?php echo e($payment_methods['payment_currency']); ?>">
+                                                               <?php if($payment_methods['payment_method']=='braintree'): ?>
+
+                                                                   <input id="<?php echo e($payment_methods['payment_method']); ?>_public_key" type="hidden" name="public_key" value="<?php echo e($payment_methods['public_key']); ?>">
+                                                                   <input id="<?php echo e($payment_methods['payment_method']); ?>_environment" type="hidden" name="<?php echo e($payment_methods['payment_method']); ?>_environment" value="<?php echo e($payment_methods['environment']); ?>">
+                                                                   <li>
+                                                                    <input type="radio" onClick="paymentMethods();" name="payment_method" class="payment_method" value="<?php echo e($payment_methods['payment_method']); ?>" <?php if(!empty(session('payment_method'))): ?> <?php if(session('payment_method')==$payment_methods['payment_method']): ?> checked <?php endif; ?> <?php endif; ?>>
+                                                                       <label for="<?php echo e($payment_methods['payment_method']); ?>"><?php echo e($payment_methods['name']); ?></label>
+                                                                   </li>
+
+                                                               <?php else: ?>
+                                                               
+
+                                                                   <?php if($payment_methods['payment_method']=='cash_on_delivery'): ?>
+
+                                                                  <input id="<?php echo e($payment_methods['payment_method']); ?>_public_key" type="hidden" name="public_key" value="<?php echo e($payment_methods['public_key']); ?>">
+                                                                   <input id="<?php echo e($payment_methods['payment_method']); ?>_environment" type="hidden" name="<?php echo e($payment_methods['payment_method']); ?>_environment" value="<?php echo e($payment_methods['environment']); ?>">
+
+                                                                   <li>
+                                                                    <input onClick="paymentMethods();" type="radio" name="payment_method" class="payment_method" value="<?php echo e($payment_methods['payment_method']); ?>" <?php if(!empty(session('payment_method'))): ?> <?php if(session('payment_method')==$payment_methods['payment_method']): ?> checked <?php endif; ?> <?php endif; ?>>
+                                                                    <label for="<?php echo e($payment_methods['payment_method']); ?>"><?php echo app('translator')->get('website.cash_on_delivery'); ?>) (<?php echo app('translator')->get('website.addtianal_cost'); ?> AED 15)</label>
+                                                                   </li>
+                                                               <?php endif; ?>
+
+                                                                <?php if($payment_methods['payment_method']=='telr'): ?>
+                                                                   <input id="<?php echo e($payment_methods['payment_method']); ?>_public_key" type="hidden" name="public_key" value="<?php echo e($payment_methods['public_key']); ?>">
+                                                                   <input id="<?php echo e($payment_methods['payment_method']); ?>_environment" type="hidden" name="<?php echo e($payment_methods['payment_method']); ?>_environment" value="<?php echo e($payment_methods['environment']); ?>">
+
+                                                                   <li>
+                                                                    <input onClick="paymentMethods();" type="radio" name="payment_method" class="payment_method" value="<?php echo e($payment_methods['payment_method']); ?>" <?php if(!empty(session('payment_method'))): ?> <?php if(session('payment_method')==$payment_methods['payment_method']): ?> checked <?php endif; ?> <?php endif; ?>>
+                                                                    <label for="<?php echo e($payment_methods['payment_method']); ?>"><?php echo app('translator')->get('website.telr'); ?>)</label>
+                                                                   </li>
+                                                                   
+                                                               <?php endif; ?>
+                                                                   
+                                                               <?php endif; ?>
+
+                                                           <?php endif; ?>
+                                                       <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                   </ul>
+                                               </form>
+                                           </div>
+                                           <div class="button">
+
+                                                           <!--- paypal -->
+                                                           <div id="paypal_button" class="payment_btns" style="display: none"></div>
+
+                                                           <button id="braintree_button" style="display: none" class="btn btn-dark payment_btns" data-toggle="modal" data-target="#braintreeModel" ><?php echo app('translator')->get('website.Order Now'); ?></button>
+
+                                                           <button id="stripe_button" class="btn btn-dark payment_btns" style="display: none" data-toggle="modal" data-target="#stripeModel" ><?php echo app('translator')->get('website.Order Now'); ?></button>
+
+                                                           <button id="cash_on_delivery_button" class="btn btn-dark payment_btns" style="display: none"><?php echo app('translator')->get('website.Order Now'); ?></button>
+                                                           
+                                                           <button id="telr_button" class="btn btn-dark payment_btns" style="display: none"><?php echo app('translator')->get('website.Order Now'); ?></button>
+                                                           
+                                                           <button id="instamojo_button" class="btn btn-dark payment_btns" style="display: none" data-toggle="modal" data-target="#instamojoModel"><?php echo app('translator')->get('website.Order Now'); ?></button>
+
+                                                           <a href="<?php echo e(URL::to('/checkout/hyperpay')); ?>" id="hyperpay_button" class="btn btn-dark payment_btns" style="display: none"><?php echo app('translator')->get('website.Order Now'); ?></a>
+
+                                          </div>
+                                       </div>
+                                       <!-- The braintree Modal -->
+                                       <div class="modal fade" id="braintreeModel">
+                                         <div class="modal-dialog">
+                                           <div class="modal-content">
+                                               <form id="checkout" method="post" action="<?php echo e(URL::to('/place_order')); ?>">
+                                                 <input type="hidden" name="_token" id="csrf-token" value="<?php echo e(Session::token()); ?>" />
+                                                   <!-- Modal Header -->
+                                                   <div class="modal-header">
+                                                       <h4 class="modal-title"><?php echo app('translator')->get('website.BrainTree Payment'); ?></h4>
+                                                       <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                   </div>
+                                                   <div class="modal-body">
+                                                         <div id="payment-form"></div>
+                                                   </div>
+                                                   <div class="modal-footer">
+                                                       <button type="submit" class="btn btn-dark"><?php echo app('translator')->get('website.Pay'); ?> <?php echo e(Session::get('symbol_left')); ?><?php echo e(number_format((float)$total_price+0, 2, '.', '')); ?><?php echo e(Session::get('symbol_right')); ?></button>
+                                                   </div>
+                                               </form>
+                                           </div>
+                                          </div>
+                                       </div>
+
+                                       <!-- The instamojo Modal -->
+                                       <div class="modal fade" id="instamojoModel">
+                                         <div class="modal-dialog">
+                                           <div class="modal-content">
+                                               <form id="instamojo_form" method="post" action="">
+                                                 <input type="hidden" name="_token" id="csrf-token" value="<?php echo e(Session::token()); ?>" />
+                                                 <input type="hidden" name="amount" value="<?php echo e(number_format((float)$total_price+0, 2, '.', '')); ?>">
+                                                   <!-- Modal Header -->
+                                                   <div class="modal-header">
+                                                       <h4 class="modal-title"><?php echo app('translator')->get('website.Instamojo Payment'); ?></h4>
+                                                       <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                   </div>
+                                                  <div class="modal-body">
+                                                    <div class="from-group mb-3">
+                                    									<div class="col-12"> <label for="inlineFormInputGroup"><?php echo app('translator')->get('website.Full Name'); ?></label></div>
+                                    									<div class="input-group col-12">
+                                    										<input type="text" name="firstName" id="firstName" placeholder="<?php echo app('translator')->get('website.Full Name'); ?>" class="form-control">
+                                    										<span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your full name'); ?></span>
+                                    								 </div>
+                                    								</div>
+                                                    <div class="from-group mb-3">
+                                    									<div class="col-12"> <label for="inlineFormInputGroup"><?php echo app('translator')->get('website.Email'); ?></label></div>
+                                    									<div class="input-group col-12">
+                                    										<input type="text" name="email_id" id="email_id" placeholder="<?php echo app('translator')->get('website.Email'); ?>" class="form-control">
+                                    										<span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your email address'); ?></span>
+                                    								 </div>
+                                    								</div>
+                                                    <div class="from-group mb-3">
+                                    									<div class="col-12"> <label for="inlineFormInputGroup"><?php echo app('translator')->get('website.Phone Number'); ?></label></div>
+                                    									<div class="input-group col-12">
+                                    										<input type="text" name="phone_number" id="insta_phone_number" placeholder="<?php echo app('translator')->get('website.Phone Number'); ?>" class="form-control">
+                                    										<span class="help-block error-content" hidden><?php echo app('translator')->get('website.Please enter your valid phone number'); ?></span>
+                                    								 </div>
+                                    								</div>
+
+                                                        <div class="alert alert-danger alert-dismissible" id="insta_mojo_error" role="alert" style="display: none">
+                                                           <span class="sr-only"><?php echo app('translator')->get('website.Error'); ?>:</span>
+                                                           <span id="instamojo-error-text"></span>
+                                                       </div>
+                                                   </div>
+                                                   <div class="modal-footer">
+                                                       <button type="button" id="pay_instamojo" class="btn btn-dark"><?php echo app('translator')->get('website.Pay'); ?> <?php echo e($web_setting[19]->value); ?><?php echo e(number_format((float)$total_price+0, 2, '.', '')); ?></button>
+                                                   </div>
+                                               </form>
+                                           </div>
+                                          </div>
+                                       </div>
+
+                                       <!-- The stripe Modal -->
+                                       <div class="modal fade" id="stripeModel">
+                                           <div class="modal-dialog">
+                                               <div class="modal-content">
+
+                                               <main>
+                                               <div class="container-lg">
+                                                   <div class="cell example example2">
+                                                       <form>
+                                                         <div class="row">
+                                                           <div class="field">
+                                                             <div id="example2-card-number" class="input empty"></div>
+                                                             <label for="example2-card-number" data-tid="elements_examples.form.card_number_label"><?php echo app('translator')->get('website.Card number'); ?></label>
+                                                             <div class="baseline"></div>
+                                                           </div>
+                                                         </div>
+                                                         <div class="row">
+                                                           <div class="field half-width">
+                                                             <div id="example2-card-expiry" class="input empty"></div>
+                                                             <label for="example2-card-expiry" data-tid="elements_examples.form.card_expiry_label"><?php echo app('translator')->get('website.Expiration'); ?></label>
+                                                             <div class="baseline"></div>
+                                                           </div>
+                                                           <div class="field half-width">
+                                                             <div id="example2-card-cvc" class="input empty"></div>
+                                                             <label for="example2-card-cvc" data-tid="elements_examples.form.card_cvc_label"><?php echo app('translator')->get('website.CVC'); ?></label>
+                                                             <div class="baseline"></div>
+                                                           </div>
+                                                         </div>
+                                                       <button type="submit" class="btn btn-dark" data-tid="elements_examples.form.pay_button"><?php echo app('translator')->get('website.Pay'); ?> <?php echo e($web_setting[19]->value); ?><?php echo e(number_format((float)$total_price+0, 2, '.', '')); ?></button>
+
+                                                         <div class="error" role="alert"><svg xmlns="https://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17">
+                                                             <path class="base" fill="#000" d="M8.5,17 C3.80557963,17 0,13.1944204 0,8.5 C0,3.80557963 3.80557963,0 8.5,0 C13.1944204,0 17,3.80557963 17,8.5 C17,13.1944204 13.1944204,17 8.5,17 Z"></path>
+                                                             <path class="glyph" fill="#FFF" d="M8.5,7.29791847 L6.12604076,4.92395924 C5.79409512,4.59201359 5.25590488,4.59201359 4.92395924,4.92395924 C4.59201359,5.25590488 4.59201359,5.79409512 4.92395924,6.12604076 L7.29791847,8.5 L4.92395924,10.8739592 C4.59201359,11.2059049 4.59201359,11.7440951 4.92395924,12.0760408 C5.25590488,12.4079864 5.79409512,12.4079864 6.12604076,12.0760408 L8.5,9.70208153 L10.8739592,12.0760408 C11.2059049,12.4079864 11.7440951,12.4079864 12.0760408,12.0760408 C12.4079864,11.7440951 12.4079864,11.2059049 12.0760408,10.8739592 L9.70208153,8.5 L12.0760408,6.12604076 C12.4079864,5.79409512 12.4079864,5.25590488 12.0760408,4.92395924 C11.7440951,4.59201359 11.2059049,4.59201359 10.8739592,4.92395924 L8.5,7.29791847 L8.5,7.29791847 Z"></path>
+                                                           </svg>
+                                                           <span class="message"></span></div>
+                                                       </form>
+                                                                   <div class="success">
+                                                                     <div class="icon">
+                                                                       <svg width="84px" height="84px" viewBox="0 0 84 84" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
+                                                                         <circle class="border" cx="42" cy="42" r="40" stroke-linecap="round" stroke-width="4" stroke="#000" fill="none"></circle>
+                                                                         <path class="checkmark" stroke-linecap="round" stroke-linejoin="round" d="M23.375 42.5488281 36.8840688 56.0578969 64.891932 28.0500338" stroke-width="4" stroke="#000" fill="none"></path>
+                                                                       </svg>
+                                                                     </div>
+                                                                     <h3 class="title" data-tid="elements_examples.success.title"><?php echo app('translator')->get('website.Payment successful'); ?></h3>
+                                                                     <p class="message"><span data-tid="elements_examples.success.message"><?php echo app('translator')->get('website.Thanks You Your payment has been processed successfully'); ?></p>
+                                                                   </div>
+
+                                                               </div>
+                                                           </div>
+                                                       </main>
+                                                   </div>
+                                             </div>
+                                         </div>
+
+                                   </div>
+
+                 </div>
+               </div>
+         </div>
+         </div>
+     </div>
+     <?php
+     $default_currency = DB::table('currencies')->where('is_default',1)->first();
+     if($default_currency->id == Session::get('currency_id')){
+
+       $currency_value = 1;
+     }else{
+       $session_currency = DB::table('currencies')->where('id',Session::get('currency_id'))->first();
+
+       $currency_value = $session_currency->value;
+     }
+     ?>
+     <div class="col-12 col-xl-3 checkout-right">
+       <table class="table right-table">
+         <thead>
+           <tr>
+             <th scope="col" colspan="2" align="center"><?php echo app('translator')->get('website.Order Summary'); ?></th>
+
+           </tr>
+         </thead>
+         <tbody>
+           <tr>
+             <th scope="row"><?php echo app('translator')->get('website.SubTotal'); ?></th>
+             <td align="right"><?php echo e(Session::get('symbol_left')); ?><?php echo e($price+0); ?><?php echo e(Session::get('symbol_right')); ?></td>
+
+           </tr>
+           <tr>
+             <th scope="row"><?php echo app('translator')->get('website.Discount'); ?></th>
+             <td align="right"><?php echo e(Session::get('symbol_left')); ?><?php echo e(number_format((float)session('coupon_discount'), 2, '.', '')+0*$currency_value); ?><?php echo e(Session::get('symbol_right')); ?></td>
+
+           </tr>
+           <tr>
+               <th scope="row"><?php echo app('translator')->get('website.Tax'); ?></th>
+               <td align="right"><?php echo e(Session::get('symbol_left')); ?><?php echo e($tax_rate*$currency_value); ?><?php echo e(Session::get('symbol_right')); ?></td>
+
+             </tr>
+             <tr class="others_charge_cod" style="display: none">
+               <th scope="row"><?php echo app('translator')->get('website.Others Charge'); ?></th>
+               <td align="right" ><?php echo e(Session::get('symbol_left')); ?><?php echo e('15.00'); ?><?php echo e(Session::get('symbol_right')); ?></td>
+            </tr>
+            <tr class="item-price others_charge_cod"  style="display: none">
+               <th scope="row"><?php echo app('translator')->get('website.Total'); ?></th>
+               <td align="right" ><?php echo e(Session::get('symbol_left')); ?><?php echo e(number_format((float)$total_price+15, 2, '.', '')+0*$currency_value); ?><?php echo e(Session::get('symbol_right')); ?></td>
+             </tr>
+         
+
+          
+            <tr class="item-price others_charge_telr"  style="display: none">
+               <th scope="row"><?php echo app('translator')->get('website.Total'); ?></th>
+               <td align="right" ><?php echo e(Session::get('symbol_left')); ?><?php echo e(number_format((float)$total_price+0, 2, '.', '')+0*$currency_value); ?><?php echo e(Session::get('symbol_right')); ?></td>
+            </tr>
+         </tbody>
+       </table>
+       </div>
+   </div>
+ </div>
+ </div>
+ 
+ 
+ <div class="modal fade in" id="telrModal" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+           <div class="modal-content">
+               <div class="modal-body text-center">
+                   <div id="telrDiv1" class="text-center" style="min-height:100px;"><h2>Please wait...</h2></div>
+                        <div id="telrDiv2" style="min-height:150px;">
+                         <h2><?php echo e(trans('website.Are you Sure?')); ?></h2>
+                         <p><?php echo e(trans('website.Please complete the transaction in new tab and be back to Submit the form to conitune')); ?>...</p>
+                         <p><?php echo e(trans('website.Once it is cancelled, please refresh the page to try again')); ?></p>
+                         <p><small style="color:#d30000">* <?php echo e(trans('website.Please make sure your pop-up blocker is turned off')); ?></small></p>
+                         <button type="button" class="btn btn-danger text-uppercase" onclick="closeTelrModal()"><?php echo e(trans('website.Cancel')); ?></button>
+                         <a id="telrIframe" href="" class="btn btn-success text-uppercase" target="_blank"> <?php echo e(trans('website.Pay')); ?></a>
+                         <br/><br/>
+                         <p><?php echo e(trans('website.this page will automatically timeout in')); ?> <h2 id="counter"></h2> <?php echo e(trans('website.minutes')); ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</section>
+
+<!-- Latest compiled and minified CSS
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  
+ -->
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+
+    var language = "<?php echo e(\Config::get("app.locale")); ?>";
+    var floatDir = (language == 'en') ? 'float-right' : 'float-left';
+    
+    $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    
+
+    checkCOD();
+    // jQuery(".others_charge_cod").hide();
+    jQuery('input[type=radio][name=payment_method]').change(function() {
+      checkCOD();
+    });
+
+    function checkCOD(){
+      var payment_method = jQuery(".payment_method:checked").val();
+      if(payment_method == 'cash_on_delivery'){
+        jQuery(".others_charge_cod").show();
+        jQuery(".others_charge_telr").hide();
+      }
+
+      if(payment_method == 'telr'){
+        jQuery(".others_charge_cod").hide();
+        jQuery(".others_charge_telr").show();
+      }
+    }
+
+    
+    jQuery(document).on('click', '#cash_on_delivery_button', function(e){
+    	jQuery("#update_cart_form").submit();
+    });
+
+    //telr_button
+    jQuery(document).on('click', '#telr_button', function(e){
+        
+        $('#telrDiv1').show();
+        $('#telrDiv2').hide();
+       
+        $('#telrModal').modal({backdrop: 'static',keyboard: false});
+        // lets get the garage list
+        
+        var param = {
+            'language_id' : (language == 'en') ? 1: 2,
+            'amount': <?php echo e($total_price); ?>,
+            '_token' : '<?php echo csrf_token() ?>',
+        }
+        $.ajax({
+           type:'POST',
+           url:'/checkout_telr_method',
+           data: param,
+           success:function(data) {
+               let resp = JSON.parse(data);
+               if(resp.success ==1){
+                    telrCode = resp.data.webview.code;
+                    $('#telrIframe').attr('href', resp.data.webview.start);
+                    $('#telrDiv1').hide();
+                    $('#telrDiv2').show();
+                    showDialog();
+               }else{
+                   $('#telrModal').modal('hide');
+                   alert('Something went wrong!!!');
+               }
+                
+           }
+        }); 
+    	//submit the form 
+    	//
+    });
+
+    var telrCode = null;
+    var telrAbort = "https://secure.telr.com/gateway/webview_abort.html";
+    var interval;
+    
+    function closeTelrModal(){
+       $('#telrModal').modal('hide');
+    }
+    
+    var secsToRemainingTime = function secsToRemainingTime(secs) {
+          var mm = ('0'+~~(secs / 60)).slice(-2);
+          var ss = ('0'+(secs % 60)).slice(-2);
+          return mm + ':' + ss;
+        };
+  
+    function showDialog() {
+        var time = 5 * 60;
+        console.log('start');
+        $('#counter').html(secsToRemainingTime(time));
+        
+        
+        interval = setInterval(function () {
+          if (time == 0) {
+            clearInterval(interval);
+            interval = undefined;
+            
+            // invlaid the token
+            if(telrCode){
+                $('#telrIframe').attr('href', telrAbort);
+                $('#telrIframe').attr('target', '_blank').get(0).click();
+            }
+               
+            // hide the modal
+                closeTelrModal();
+                
+            return;
+          }
+          if(time%5 == 0){
+            $.ajax({
+                type:'POST',
+                url:'<?php echo e(URL::to('/telr-payment-status')); ?>',
+                data: {'refrenceCode' : telrCode, '_token' : '<?php echo csrf_token() ?>'},
+                success:function(data) {
+                    let resp = JSON.parse(data);
+                    if(resp.success == '1'){
+                        closeTelrModal();
+                        jQuery("#update_cart_form").submit();
+                        return;
+                    }
+                }
+            });   
+          } // if closed here
+          console.log(secsToRemainingTime(--time));
+          $('#counter').html(secsToRemainingTime(--time));
+        }, 1000);
+    }
+    
+    
+    $('#telrModal').on('hidden.bs.modal', function () {
+      console.log('modal closed');
+      if (interval) {
+          clearInterval(interval);
+          interval = undefined;
+        }
+        window.open(telrAbort, '_blank');
+    })
+    
+    $(document).ready(function (){
+        //$('#telrModal').modal('hide');
+    });
+    
+</script>
+<script>
+ function redirect(i, a , b){
+         var c_id = 'oc_'+i+'_'+a+'_'+b;
+         var url;
+         if(document.getElementById(c_id).checked){
+             url = "<?php echo e(URL::to('/apply_other_charge')); ?>" + '?id='+a+'&bid='+b;
+         }else{
+             url = "<?php echo e(URL::to('/remove_other_charge/')); ?>" + '?id='+a+'&bid='+b;
+         }
+         //alert(url);
+        window.location.href = url;
+    }
+</script>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('autoshop.layout', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/g2g/public_html/resources/views/autoshop/checkout.blade.php ENDPATH**/ ?>

@@ -1,0 +1,29 @@
+/* YOUR CUSTOM CSS */
+ul#cat_nav li a:hover, ul#cat_nav li a#active, ul#cat_nav li a.active{
+	background: #d20811;
+    color: white;
+    font-weight: 700;
+}
+
+.card-header{
+	background: #d20811;
+    color: white;
+    font-size: initial;
+    font-weight: 600;
+}
+
+.bg-custom-danger{
+	background: #d20811;
+}
+
+.bordered-bottom{
+	border-bottom: 1px solid #ddd;
+}
+
+.card-header-custom{
+	padding: 10px 0px 0px 10px;
+}
+
+.card-body-custom{
+	padding: .5rem;
+}

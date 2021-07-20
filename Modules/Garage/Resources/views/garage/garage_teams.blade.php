@@ -1,0 +1,282 @@
+@extends('garage.layout')
+
+@section('content')
+
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>Manage Garage Team</h1>
+    <ol class="breadcrumb">
+      <li><a href="{{ route('garage.dashboard')}}"><i class="fa fa-dashboard"></i> {{ trans('labels.breadcrumb_dashboard') }}</a></li>
+       
+      <li class="active">Manage Garage Team</li>
+    </ol>
+  </section>
+
+
+
+
+
+
+
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+          <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-xs-12">
+                        <div class="box box-info">
+                          <br>
+                          <div class="row">
+                              <div class="col-md-12">
+                                @if ($errors->any())
+                                  <div class="alert alert-danger">
+                                      <ul>
+                                          @foreach ($errors->all() as $error)
+                                              <li>{{ $error }}</li>
+                                          @endforeach
+                                      </ul>
+                                  </div>
+                                @endif
+                                @if (session('status'))
+                                    <div class="alert alert-warning">
+                                        {{ session('status') }}
+                                    </div>
+                                @endif
+                                 @if (isset($status))
+                                    <div class="alert alert-warning">
+                                        {{ $status }}
+                                    </div>
+                                @endif
+                              </div>
+                            </div>
+              
+                            <div class="box-body">
+                <div class="row">
+                <div class="col-md-12">
+                   <table class="table table-striped table-condensed table-bordered">
+                  <thead>
+                    <tr style="background: #e9ecef">
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Gender</th>
+                      <th>Phone</th>
+                      <th>Address</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @if(!empty($garageTeams) && count($garageTeams) > 0)
+                      @foreach($garageTeams as $garageTeam)
+                        <tr>
+                          <td>{{$garageTeam->id}}</td>
+                          <td>{{$garageTeam->first_name}} {{$garageTeam->last_name}}</td>
+                          <td>
+                            @if($garageTeam->gender == 1)
+                              <span class=" text-success">Male</span>
+                            @else
+                              <span class=" text-success">Female</span>
+                            @endif
+                          </td>
+                           <td>{{$garageTeam->phone}}</td>
+                            <td>{{$garageTeam->address}}</td>
+                          <td>
+                            <a href="{{ route('garage.team.delete',['id' => $garageTeam->id]) }}">
+                              <button type="button" class="btn btn-sm btn-danger">
+                                <i class="fa fa-fw fa-trash"></i>
+                              </button>
+                            </a>
+                          </td>
+                        </tr>
+                       @endforeach
+                    @else
+                      <tr>
+                        <td colspan="9">
+                            No garage team member found.
+                        </td>
+                      </tr>
+                    @endif
+                  </tbody>
+                </table>
+                 <div class="row" style="padding: 20px;">
+                     @if(!empty($garageTeams) && count($garageTeams) > 0)
+                       {{ $garageTeams->links() }}
+                     @endif
+                 </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12">
+        @if(!empty($garageTeams) && count($garageTeams) > 0)
+            <div class="box box-solid box-primary">
+              <div class="box-header">
+                Team Member Images
+              </div>
+              <div class="box-body">
+                <div class="row text-center">
+                  @foreach($garageTeams as $garageTeam)
+                    <div class="col-6">
+                      <img src="{{ asset('uploads/garage_images/'. $garageTeam->image) }}" height="80" width="80" alt="{{ $garageTeam->first_name }}">
+                      <p class="">{{ $garageTeam->first_name }} {{ $garageTeam->last_name }}</p>
+                    </div>
+                  @endforeach
+                 </div>
+              </div>
+            </div>
+        @endif
+    </div>
+  </div>
+
+   
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="box box-solid box-primary">
+        <div class="box-header">
+         Add New Team Member
+        </div>
+
+        <div class="box-body">
+
+
+            <div class="row p-3">
+                <div class="col-md-12">
+                   <form class="form-horizontal" method="POST" action="{{ route('garage.team.update')}}" enctype="multipart/form-data">
+                      {{ csrf_field() }}
+                      <input type="hidden" name="garage_id" value="{{ $garage->id }}">
+                    <div class="row">
+
+                      <div class="col-sm-4">
+                          <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">First Name</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Enter First Name" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="col-sm-4">
+                        <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">Last Name</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Enter Last Name" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                       <div class="col-sm-4">
+                        <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">Phone</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="phone" id="phone" placeholder="Enter Phone" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                    </div>
+
+                    <div class="row">
+
+                      <div class="col-sm-4">
+                          <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">Email</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="email" id="email" placeholder="Enter Email" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="col-sm-4">
+                          <div class="form-group">
+                            <label for="tag_status" class="col-sm-12 col-form-label">Gender</label>
+                            <div class="col-sm-12">
+                              <select class="form-control" name="gender" id="gender" required="required">
+                                  <option value="">Select</option>
+                                  <option value="1">Male</option>
+                                  <option value="2">Female</option>
+                                </select>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="col-md-4">
+                          <div class="form-group">
+                            <label for="exampleInputFile">Image </label>
+                            <div class="input-group">
+                              <div class="custom-file">
+                                <input type="file"  id="cover_photo" name="cover_photo">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+
+                     <div class="row">
+
+                      <div class="col-sm-12">
+                          <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">Address</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="address" id="address" placeholder="Enter Address" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                    </div>
+
+                    <div class="row">
+
+                      <div class="col-sm-4">
+                          <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">City</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="city" id="city" placeholder="Enter City" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="col-sm-4">
+                        <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">Country</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="country" id="country" placeholder="Enter Country" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                       <div class="col-sm-4">
+                        <div class="form-group">
+                            <label for="tag_name" class="col-sm-12 col-form-label">Postal</label>
+                            <div class="col-sm-12">
+                              <input type="text" class="form-control" name="postal" id="postal" placeholder="Enter Postal" required="required" />
+                            </div>
+                          </div>
+                      </div>
+
+                    </div>
+
+                     
+
+
+                      
+
+                      <div class="text-center">
+                        <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-save" ></i> Update New Team Member</button>
+                      </div>
+                    </form>
+                </div>
+            </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+@stop

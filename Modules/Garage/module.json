@@ -1,0 +1,13 @@
+{
+    "name": "Garage",
+    "alias": "garage",
+    "description": "",
+    "keywords": [],
+    "order": 0,
+    "providers": [
+        "Modules\\Garage\\Providers\\GarageServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
